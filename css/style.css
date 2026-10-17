@@ -53,7 +53,7 @@ a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outlin
 .wrap { max-width: var(--max); margin: 0 auto; padding: 0 1rem; }
 
 /* ---------- Header / hero ---------- */
-.hero { padding: 1.75rem 0 1.25rem; text-align: center; }
+.hero { padding-top: 1.75rem; padding-bottom: 1.25rem; text-align: center; }  /* side padding comes from .wrap */
 .hero img {
   width: 140px; height: 140px; border-radius: 50%;
   object-fit: cover; background: var(--bg-soft);
