@@ -21,7 +21,7 @@ except ImportError:
     sys.exit("segno is not installed. Run:  pip install segno")
 
 ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_BASE_URL = "https://jsjkymcs2s-maker.github.io"   # change here if you get a custom domain
+DEFAULT_BASE_URL = "https://christopherrivasmed.github.io"   # change here if you get a custom domain
 QUIET_ZONE = 4        # modules; QR standard minimum
 DPI = 600
 

@@ -1,7 +1,7 @@
 # Christopher A. Rivas: academic landing page
 
 A single-page, mobile-first site for research posters. Plain HTML and CSS, no framework, no build step.
-Live at **https://jsjkymcs2s-maker.github.io/** (GitHub Pages, deployed from the `main` branch).
+Live at **https://christopherrivasmed.github.io/** (GitHub Pages, deployed from the `main` branch).
 
 ```
 index.html            the whole page (About, Publications, Links, CV, Posters)
@@ -56,7 +56,7 @@ Pick a short slug: lowercase letters, digits and hyphens, for example `aans-2026
    python scripts/make_qr.py aans-2026
    ```
    This writes `qr/aans-2026.svg` (vector, use this for print) and `qr/aans-2026.png` (600 dpi).
-   It encodes `https://jsjkymcs2s-maker.github.io/p/aans-2026/` at error-correction level Q with a
+   It encodes `https://christopherrivasmed.github.io/p/aans-2026/` at error-correction level Q with a
    4-module quiet zone. Use `--size-in 3` to set the PNG's printed size. Keep the white border
    when placing it on the poster, print dark on light, and make it at least about 2 x 2 inches (5 x 5 cm).
 5. **Check and publish.**
@@ -113,4 +113,4 @@ Each `/p/<slug>/` path then shows up as its own row in your GoatCounter dashboar
 ## Deploying
 
 GitHub Pages is set to serve the `main` branch, root folder. Every push to `main` goes live automatically.
-Check the status with `gh api repos/jsjkymcs2s-maker/jsjkymcs2s-maker.github.io/pages`.
+Check the status with `gh api repos/christopherrivasmed/christopherrivasmed.github.io/pages`.

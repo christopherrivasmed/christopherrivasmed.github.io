@@ -26,7 +26,7 @@ TEMPLATE = """<!doctype html>
     so the page view has time to be counted before the redirect.
   -->
   <meta http-equiv="refresh" content="0; url=/#poster-{slug}">
-  <link rel="canonical" href="https://jsjkymcs2s-maker.github.io/#poster-{slug}">
+  <link rel="canonical" href="https://christopherrivasmed.github.io/#poster-{slug}">
   <style>
     :root {{ color-scheme: light dark; }}
     body {{ font: 1.1rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; margin: 0; padding: 2rem 1rem; text-align: center; }}
