@@ -93,6 +93,7 @@ section p { margin: 0 0 0.75rem; }
 }
 .btn:hover { border-color: var(--accent); }
 .btn svg { width: 24px; height: 24px; flex: none; fill: currentColor; color: var(--accent); }
+.btn small { display: block; font-weight: 400; font-size: 0.85rem; color: var(--muted); overflow-wrap: anywhere; }
 .btn-primary { background: var(--accent); border-color: var(--accent); color: var(--accent-text); justify-content: center; }
 .btn-primary svg { color: var(--accent-text); }
 .btn-primary:hover { filter: brightness(1.08); }

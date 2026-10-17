@@ -1,4 +1,4 @@
-# Chris Rivas: academic landing page
+# Christopher A. Rivas: academic landing page
 
 A single-page, mobile-first site for research posters. Plain HTML and CSS, no framework, no build step.
 Live at **https://jsjkymcs2s-maker.github.io/** (GitHub Pages, deployed from the `main` branch).
@@ -10,7 +10,7 @@ cv/Rivas_CV.pdf       your CV
 posters/<slug>.pdf    one PDF per poster
 p/<slug>/index.html   permanent redirect that a poster's QR code points to
 qr/<slug>.svg|.png    QR codes (not linked from the page)
-assets/               photo, favicon, link-preview image
+assets/               headshot (photo.jpg), favicon, link-preview image
 scripts/              new_poster.py, make_qr.py, check_site.py, update_date.py
 ```
 
@@ -87,12 +87,14 @@ The link on the page and any printed references keep working. Keep it under a fe
 
 ## Edit links and text
 
-* **Profile buttons:** in the `Links` section of `index.html`, replace each `PLACEHOLDER_*` in the
-  URL (ORCID ID, Google Scholar ID, My NCBI ID, ResearchGate name, LinkedIn handle). Delete a whole
-  `<li>...</li>` to remove a button.
-* **Email:** replace `PLACEHOLDER_EMAIL` in both places in the header.
-* **Photo:** save a square image as `assets/photo.jpg` (about 400 x 400) and change the `<img src>` in the header.
-  Keep the `alt` text meaningful.
+* **Profile and social buttons:** in the `Links` and `Social media` sections of `index.html`, edit the
+  `href` of the button. Delete a whole `<li>...</li>` to remove one, or copy one to add another.
+  Use clean profile URLs without tracking parameters such as `?ev=...` or `?isSelfProfile=true`.
+* **Email:** edit the address in the header (both the `mailto:` and the visible text). If you
+  change it, add it to `ALLOWED_EMAILS` in `scripts/check_site.py` so the privacy scan accepts it.
+* **Photo:** `assets/photo.jpg` is a 420 x 420 square crop. To change it, save a new square JPEG
+  with the same name (strip location metadata first; re-saving through Pillow or an image
+  editor's "export" does this). Keep the `alt` text meaningful.
 * **Publications:** copy the `<li id="pub-...">` block and edit it. Newest first.
 * **Link-preview image:** replace `assets/og-image.png` (1200 x 630 PNG or JPG). Chat apps cache previews, so a
   changed image can take a while to appear.

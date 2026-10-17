@@ -16,6 +16,7 @@ ROOT = Path(__file__).resolve().parent.parent
 TEXT_EXT = {".html", ".css", ".js", ".md", ".py", ".svg", ".txt", ".json", ".xml"}
 SKIP_DIRS = {".git", "__pycache__"}
 problems = []
+ALLOWED_EMAILS = {"car452@drexel.edu"}   # addresses you deliberately publish on the page
 
 
 def text_files():
@@ -58,7 +59,7 @@ for p in text_files():
         continue
     for n, line in enumerate(p.read_text(encoding="utf-8", errors="replace").splitlines(), 1):
         for label, rx in (("phone number", phone), ("email address", email), ("street address", street)):
-            if rx.search(line):
+            if rx.search(line) and not (rx is email and rx.search(line).group(0) in ALLOWED_EMAILS):
                 problems.append(f"{p.relative_to(ROOT)}:{n}: possible {label}: {rx.search(line).group(0)}")
 
 print("Checks")
