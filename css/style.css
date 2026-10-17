@@ -1,0 +1,142 @@
+/* Chris Rivas - academic landing page. Plain CSS, mobile-first, no build step. */
+
+:root {
+  color-scheme: light dark;
+  --bg: #ffffff;
+  --bg-soft: #f3f5f9;
+  --text: #171c26;
+  --muted: #4a5465;
+  --line: #d5dae3;
+  --accent: #1d4ed8;
+  --accent-text: #ffffff;
+  --highlight: #fff6cf;
+  --placeholder: #9a3412;
+  --radius: 10px;
+  --max: 46rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f1420;
+    --bg-soft: #182033;
+    --text: #e8ecf4;
+    --muted: #b0b9ca;
+    --line: #2d3750;
+    --accent: #8ab4ff;
+    --accent-text: #0b1020;
+    --highlight: #3a3411;
+    --placeholder: #fdba74;
+  }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font: 1.0625rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+a { color: var(--accent); text-underline-offset: 2px; }
+a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+
+.skip-link {
+  position: absolute; left: 0.5rem; top: -4rem;
+  background: var(--accent); color: var(--accent-text);
+  padding: 0.5rem 0.75rem; border-radius: 6px; z-index: 10;
+}
+.skip-link:focus { top: 0.5rem; }
+
+.wrap { max-width: var(--max); margin: 0 auto; padding: 0 1rem; }
+
+/* ---------- Header / hero ---------- */
+.hero { padding: 1.75rem 0 1.25rem; text-align: center; }
+.hero img {
+  width: 140px; height: 140px; border-radius: 50%;
+  object-fit: cover; background: var(--bg-soft);
+  border: 3px solid var(--line);
+}
+.hero h1 { margin: 0.9rem 0 0.2rem; font-size: 1.9rem; line-height: 1.2; }
+.tagline { margin: 0 auto; max-width: 34rem; color: var(--muted); }
+.contact { margin: 0.75rem 0 0; }
+.contact a { font-weight: 600; }
+
+/* Poster banner (shown by JS when arriving from /p/<slug>/) */
+.poster-banner {
+  margin: 1.25rem 0 0;
+  padding: 1rem;
+  border: 2px solid var(--accent);
+  border-radius: var(--radius);
+  background: var(--highlight);
+  text-align: left;
+}
+.poster-banner[hidden] { display: none; }
+.poster-banner h2 { margin: 0 0 0.15rem; font-size: 0.85rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.poster-banner .banner-title { margin: 0 0 0.75rem; font-weight: 700; font-size: 1.1rem; line-height: 1.35; }
+
+/* ---------- Sections ---------- */
+section { padding: 1.25rem 0; border-top: 1px solid var(--line); }
+section h2 { margin: 0 0 0.75rem; font-size: 1.35rem; line-height: 1.25; }
+section p { margin: 0 0 0.75rem; }
+
+/* ---------- Buttons ---------- */
+.btn-grid { display: grid; grid-template-columns: 1fr; gap: 0.6rem; margin: 0; padding: 0; list-style: none; }
+.btn {
+  display: flex; align-items: center; gap: 0.65rem;
+  min-height: 48px; padding: 0.6rem 0.9rem;
+  border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--bg-soft); color: var(--text);
+  text-decoration: none; font-weight: 600;
+}
+.btn:hover { border-color: var(--accent); }
+.btn svg { width: 24px; height: 24px; flex: none; fill: currentColor; color: var(--accent); }
+.btn-primary { background: var(--accent); border-color: var(--accent); color: var(--accent-text); justify-content: center; }
+.btn-primary svg { color: var(--accent-text); }
+.btn-primary:hover { filter: brightness(1.08); }
+
+@media (min-width: 30rem) {
+  .btn-grid { grid-template-columns: 1fr 1fr; }
+}
+
+/* ---------- Publications ---------- */
+.pubs { margin: 0; padding: 0; list-style: none; }
+.pubs li { padding: 0.75rem 0; border-bottom: 1px solid var(--line); }
+.pubs li:last-child { border-bottom: 0; }
+.pub-title { font-weight: 600; }
+.pub-meta { color: var(--muted); font-size: 0.95rem; }
+.pub-links { margin: 0.25rem 0 0; font-size: 0.95rem; }
+
+/* ---------- Posters ---------- */
+.poster {
+  margin: 0 0 1rem; padding: 1rem;
+  border: 1px solid var(--line); border-radius: var(--radius);
+  background: var(--bg-soft);
+  scroll-margin-top: 1rem;
+}
+.poster h3 { margin: 0 0 0.25rem; font-size: 1.1rem; line-height: 1.35; }
+.poster .meta { margin: 0 0 0.75rem; color: var(--muted); font-size: 0.95rem; }
+.poster ul { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.poster ul a {
+  display: inline-block; padding: 0.45rem 0.8rem; min-height: 44px; line-height: 1.9;
+  border: 1px solid var(--accent); border-radius: 999px; font-weight: 600; text-decoration: none;
+}
+/* Highlight the poster you arrived for (works even without JS) */
+.poster:target, .poster.is-active {
+  background: var(--highlight);
+  border: 2px solid var(--accent);
+}
+
+/* ---------- Placeholders (find them all with: python scripts/check_site.py) ---------- */
+.ph { color: var(--placeholder); font-weight: 600; }
+
+/* ---------- Footer ---------- */
+footer { padding: 1.5rem 0 2.5rem; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.9rem; text-align: center; }
+
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+@media (min-width: 40rem) {
+  .hero { padding-top: 2.5rem; }
+  .hero h1 { font-size: 2.3rem; }
+}

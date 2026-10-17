@@ -1,0 +1,67 @@
+#!/usr/bin/env python3
+"""Generate a QR code for a poster: qr/<slug>.svg (vector) and qr/<slug>.png (600 dpi).
+
+Usage:
+  pip install segno
+  python scripts/make_qr.py example
+  python scripts/make_qr.py my-slug --size-in 2.5      # printed width of the whole code incl. quiet zone
+  python scripts/make_qr.py my-slug --base-url https://example.org   # if you use a custom domain
+
+The QR encodes  <base-url>/p/<slug>/  with error correction level Q and a 4-module quiet zone
+(the minimum in the QR standard). Print it at least ~2 x 2 inches / 5 x 5 cm, dark on light.
+"""
+import argparse
+import re
+import sys
+from pathlib import Path
+
+try:
+    import segno
+except ImportError:
+    sys.exit("segno is not installed. Run:  pip install segno")
+
+ROOT = Path(__file__).resolve().parent.parent
+DEFAULT_BASE_URL = "https://jsjkymcs2s-maker.github.io"   # change here if you get a custom domain
+QUIET_ZONE = 4        # modules; QR standard minimum
+DPI = 600
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("slug", help="poster slug, e.g. example (must match p/<slug>/)")
+    ap.add_argument("--base-url", default=DEFAULT_BASE_URL, help=f"site root (default {DEFAULT_BASE_URL})")
+    ap.add_argument("--size-in", type=float, default=2.0, help="printed size in inches (default 2.0)")
+    ap.add_argument("--dark", default="#000000", help="module color (default black)")
+    ap.add_argument("--light", default="#ffffff", help="background color (default white)")
+    args = ap.parse_args()
+
+    if not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", args.slug):
+        sys.exit("Slug must be lowercase letters, digits and hyphens only.")
+    if not (ROOT / "p" / args.slug / "index.html").exists():
+        sys.exit(f"p/{args.slug}/index.html does not exist. Run: python scripts/new_poster.py {args.slug}")
+
+    url = f"{args.base_url.rstrip('/')}/p/{args.slug}/"
+    qr = segno.make(url, error="q", micro=False, boost_error=False)
+
+    total_modules = qr.symbol_size(border=QUIET_ZONE)[0]
+    scale = max(1, round(args.size_in * DPI / total_modules))   # whole pixels per module at 600 dpi
+
+    out_dir = ROOT / "qr"
+    out_dir.mkdir(exist_ok=True)
+    svg_path = out_dir / f"{args.slug}.svg"
+    png_path = out_dir / f"{args.slug}.png"
+
+    qr.save(svg_path, scale=10, border=QUIET_ZONE, dark=args.dark, light=args.light,
+            title=f"QR code for {url}", desc="Scan to open the poster page.")
+    qr.save(png_path, scale=scale, border=QUIET_ZONE, dark=args.dark, light=args.light, dpi=DPI)
+
+    px = total_modules * scale
+    print(f"URL encoded : {url}")
+    print(f"Version/ECC : {qr.designator}, error level Q, quiet zone {QUIET_ZONE} modules")
+    print(f"SVG         : {svg_path.relative_to(ROOT)} (vector, scales to any size)")
+    print(f"PNG         : {png_path.relative_to(ROOT)} ({px} x {px} px = {px / DPI:.2f} in at {DPI} dpi)")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
