@@ -154,3 +154,8 @@ footer p { margin: 0 0 0.4rem; }
 }
 
 .sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+/* "View all posters" button under the home-page poster list */
+.more { margin: 1rem 0 0; }
+.more-btn { justify-content: center; }
+.more-btn svg { width: 20px; height: 20px; }

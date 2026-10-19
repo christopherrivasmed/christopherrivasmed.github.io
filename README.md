@@ -5,14 +5,16 @@ Live at **https://christopherrivasmed.github.io/** (GitHub Pages, deployed from 
 
 How posters work:
 
-* The home page has a **search box and one tile per poster**.
+* The home page shows only the **newest few posters** (3 by default) as tiles, with a **"View all posters" button**.
+* That button opens `/posters/`, the full list with a **search box**.
 * Each tile opens that poster's own page at `/p/<slug>/`: poster title at the top, then the conference and
   date, the poster PDF, the abstract, and the **references**.
 * The **QR code on the printed poster points straight at that page**, so people scanning it can see your references.
 
 ```
-index.html               the home page (About, Publications, Links, Social, CV, Posters)
-site.json                site name, base URL, contact email, optional GoatCounter code
+index.html               the home page (About, CV, Publications, Posters, Links, Social media)
+site.json                site name, base URL, contact email, how many posters show on the home page, optional GoatCounter code
+js/poster-search.js      the search box on the all-posters page
 css/style.css            styles (light and dark mode)
 cv/Rivas_CV.pdf          your CV
 posters/<slug>/          everything for one poster:
@@ -21,6 +23,7 @@ posters/<slug>/          everything for one poster:
     references.pdf         optional standalone references document
     preview.jpg            optional preview image of the poster
 p/<slug>/index.html      GENERATED poster page (the QR target). Do not edit by hand.
+posters/index.html       GENERATED list of all posters with search. Do not edit by hand.
 qr/<slug>.svg|.png       QR codes (not linked from the page)
 assets/                  headshot (photo.jpg), favicon, link-preview image
 scripts/                 new_poster.py, build_posters.py, make_qr.py, check_site.py, update_date.py
@@ -42,7 +45,8 @@ Pick a short slug: lowercase letters, digits and hyphens, for example `aans-2026
    ```bash
    python scripts/build_posters.py
    ```
-   This writes `p/aans-2026/index.html` and adds the tile to the home page (newest poster first).
+   This writes `p/aans-2026/index.html`, adds the poster to the all-posters page, and updates the newest-posters
+   list on the home page (newest poster first).
    Run it again every time you edit a `poster.json`.
 5. **Generate the QR code.**
    ```bash
@@ -104,15 +108,22 @@ who guesses the path. They contain nothing private (only the poster URL). If you
 | `keywords` | Optional words that only the search box looks at. |
 
 A conference name that already contains a year-only date (for example "Drexel Discovery Day 2026" with `"date": "2026"`)
-shows the name once. Give the exact date (`2026-04-25`) and it is shown too. Delete any field you do not need. Do not edit `p/<slug>/index.html` or the tiles between the `POSTERS:START` and
+shows the name once. Give the exact date (`2026-04-25`) and it is shown too. Delete any field you do not need. Do not edit `p/<slug>/index.html`, `posters/index.html` or the part between the `POSTERS:START` and
 `POSTERS:END` markers in `index.html`: they are overwritten each time you run `build_posters.py`.
 
 ### Search
 
-The Posters section has a search box (it appears when JavaScript is on; without JavaScript every poster is simply
-listed). It matches every word you type against the title, conference, date, authors and keywords, ignoring case and
-accents, so `aans 2026` or `thrombectomy cns` both work. Opening `https://christopherrivasmed.github.io/?q=aans`
-pre-fills the search.
+The all-posters page (`/posters/`) has a search box (it appears when JavaScript is on; without JavaScript every poster is
+simply listed). It matches every word you type against the title, conference, date, authors and keywords, ignoring
+case and accents, so `aans 2026` or `thrombectomy cns` both work. Opening
+`https://christopherrivasmed.github.io/posters/?q=aans` pre-fills the search.
+
+### How many posters show on the home page
+
+Set `"home_poster_limit"` in `site.json` (default 3), then run `python scripts/build_posters.py`. The home page shows
+that many of the newest posters, then the "View all posters" button. Posters are ordered by `date`, newest first. A
+poster with only a year (such as `2026`) sorts after posters with a full date in the same year, so give the exact date
+when you know it.
 
 ## Test locally
 
@@ -120,7 +131,7 @@ pre-fills the search.
 python -m http.server 8000
 ```
 
-Open <http://localhost:8000/>, click a poster tile, and use the back link. Stop the server with Ctrl+C.
+Open <http://localhost:8000/>, click a poster tile, use the back link, and try the "View all posters" button. Stop the server with Ctrl+C.
 Always serve from the repo root; opening the files by double-clicking will not work for some links.
 
 ## Before every push

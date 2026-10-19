@@ -40,7 +40,7 @@ for slug in slugs:
         problems.append(f"p/{slug}/index.html is missing (run build_posters.py)")
 
 # 2. local links exist
-pages = [ROOT / "index.html", *sorted((ROOT / "p").glob("*/index.html"))]
+pages = [ROOT / "index.html", ROOT / "posters" / "index.html", *sorted((ROOT / "p").glob("*/index.html"))]
 for page in pages:
     html = re.sub(r"<!--.*?-->", "", page.read_text(encoding="utf-8"), flags=re.S)
     for ref in re.findall(r'(?:href|src)="([^"]+)"', html):
@@ -75,7 +75,7 @@ print("\nRemaining PLACEHOLDERs")
 count = 0
 for p in text_files():
     rel = p.relative_to(ROOT)
-    if p.suffix.lower() in {".py", ".md", ".css"} or rel.parts[0] == "p":
+    if p.suffix.lower() in {".py", ".md", ".css", ".js"} or rel.parts[0] == "p" or rel.as_posix() == "posters/index.html":
         continue
     text = p.read_text(encoding="utf-8")
     if rel.name == "index.html":
