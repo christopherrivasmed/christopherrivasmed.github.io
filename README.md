@@ -77,6 +77,7 @@ who guesses the path. They contain nothing private (only the poster URL). If you
   "conference": "Conference name",
   "date": "2026-04-25",
   "authors": "Rivas CA, Coauthor A",
+  "affiliation": "College of Medicine, Drexel University, Philadelphia, PA, USA",
   "keywords": ["stroke", "thrombectomy"],
   "pdf": "poster.pdf",
   "abstract": "Abstract text shown on the page (optional).",
@@ -93,16 +94,17 @@ who guesses the path. They contain nothing private (only the poster URL). If you
 | Field | Notes |
 |---|---|
 | `title`, `conference`, `date` | Required. `date` can be `2026-04-25`, `2026-04` or `2026`. Posters are listed newest first; a date in any other form is shown as typed and listed last. |
-| `pdf` | The poster PDF in the same folder. Defaults to `poster.pdf`. The page shows its size so people on slow Wi-Fi know what to expect. |
-| `authors` | Optional author line under the conference. |
-| `abstract` | Optional text shown on the page. `abstract_url` adds an Abstract button: a web link, or a file in the poster's folder. Use either or both. |
+| `pdf` | The poster PDF in the same folder (defaults to `poster.pdf` if that file exists). The page shows its size so people on slow Wi-Fi know what to expect. Leave it out until the poster is finished: the page then has no poster buttons yet. |
+| `authors`, `affiliation` | Optional author line and affiliation line under the conference. |
+| `abstract` | Optional text shown on the page, either one string or a list of paragraphs (a leading `Background:`, `Methods:`, `Results:` or `Conclusions:` is bolded). `abstract_url` adds an Abstract button: a web link, or a file in the poster's folder such as `abstract.pdf`. Use either or both. |
 | `references` | Optional list. Web addresses and `doi:10.xxxx/...` become clickable links automatically. |
 | `references_pdf` | Optional standalone document (a file in the poster's folder). Adds a "References (PDF)" button and a download button in the References section. Use it instead of, or in addition to, the list. |
 | `preview` | Optional image of the poster (jpg or png, ideally under 300 KB) shown on the page, linking to the PDF. Handy on phones, where PDFs open slowly. Export the first page of your poster to an image. |
 | `links` | Optional extra buttons. A `url` starting with `/` or `#` points at your own site (for example `/#pub-rivas-2025` for the paper in your Publications list). |
 | `keywords` | Optional words that only the search box looks at. |
 
-Delete any field you do not need. Do not edit `p/<slug>/index.html` or the tiles between the `POSTERS:START` and
+A conference name that already contains a year-only date (for example "Drexel Discovery Day 2026" with `"date": "2026"`)
+shows the name once. Give the exact date (`2026-04-25`) and it is shown too. Delete any field you do not need. Do not edit `p/<slug>/index.html` or the tiles between the `POSTERS:START` and
 `POSTERS:END` markers in `index.html`: they are overwritten each time you run `build_posters.py`.
 
 ### Search
@@ -118,7 +120,7 @@ pre-fills the search.
 python -m http.server 8000
 ```
 
-Open <http://localhost:8000/>, click the example tile, and use the back link. Stop the server with Ctrl+C.
+Open <http://localhost:8000/>, click a poster tile, and use the back link. Stop the server with Ctrl+C.
 Always serve from the repo root; opening the files by double-clicking will not work for some links.
 
 ## Before every push

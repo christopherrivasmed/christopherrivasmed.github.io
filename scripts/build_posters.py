@@ -14,9 +14,12 @@ poster.json fields
   title            required  poster title (shown at the top of the poster page)
   conference       required  where it was presented
   date             required  "2026-04-18", "2026-04" or "2026" (anything else is shown as typed)
-  pdf              optional  poster PDF in the same folder (default "poster.pdf")
+  pdf              optional  poster PDF in the same folder (default "poster.pdf" if that file exists;
+                             with no PDF the page simply has no poster buttons yet)
   authors          optional  author line
-  abstract         optional  abstract text shown on the page
+  affiliation      optional  affiliation line under the authors
+  abstract         optional  abstract text shown on the page: a string, or a list of paragraphs
+                             (a leading "Background:", "Methods:", "Results:" or "Conclusions:" is bolded)
   abstract_url     optional  link to the abstract (https://... or a file in the poster's folder)
   references       optional  list of reference strings (URLs and "doi:10...." become links)
   references_pdf   optional  standalone references document in the poster's folder, or a URL
@@ -110,7 +113,8 @@ def load_posters():
         for key in ("title", "conference", "date"):
             if not str(data.get(key, "")).strip():
                 errors.append(f"posters/{slug}/poster.json: missing '{key}'")
-        data.setdefault("pdf", "poster.pdf")
+        if "pdf" not in data and (jf.parent / "poster.pdf").is_file():
+            data["pdf"] = "poster.pdf"
         for key in ("pdf", "references_pdf", "preview", "abstract_url"):
             val = data.get(key, "")
             if val and not re.match(r"https?://", val) and not (jf.parent / val).is_file():
@@ -139,10 +143,41 @@ def extra_href(url):
     return url
 
 
+def show_date(p):
+    """Hide a year-only date when the conference name already contains it (e.g. 'Discovery Day 2026')."""
+    d = p["_date_display"]
+    return not (re.fullmatch(r"\d{4}", d) and d in p["conference"])
+
+
+def file_button(p, value, label, icon_name=None):
+    """Button for a field that is a web link or a file in the poster's folder (files show type and size)."""
+    href = file_href(p, value)
+    if re.match(r"https?://", value):
+        return f'<li><a class="btn" href="{esc(href)}">{icon(icon_name or "link")}{label}</a></li>'
+    f = ROOT / "posters" / p["slug"] / value
+    kind = f.suffix.lstrip(".").upper() or "file"
+    size = f", {human_size(f)}" if f.is_file() else ""
+    return (f'<li><a class="btn" href="{esc(href)}" target="_blank" rel="noopener">'
+            f'{icon(icon_name or "doc")}{label} ({kind}{size})</a></li>')
+
+
+def abstract_html(text):
+    """Abstract as paragraphs; a leading section name such as 'Methods:' is bolded."""
+    paras = text if isinstance(text, list) else [text]
+    out = []
+    for para in paras:
+        m = re.match(r"(Background|Introduction|Objectives?|Purpose|Methods|Results|Conclusions?|Discussion):\s+", para)
+        if m:
+            out.append(f"      <p><strong>{esc(m.group(1))}:</strong> {esc(para[m.end():])}</p>")
+        else:
+            out.append(f"      <p>{esc(para)}</p>")
+    return "\n".join(out)
+
+
 def tile(p):
     search = " ".join([p["title"], p["conference"], p["_date_display"], str(p.get("date", "")),
                        p.get("authors", ""), " ".join(p.get("keywords", [])), p["slug"]])
-    date_html = f' &middot; {esc(p["_date_display"])}'
+    date_html = f' &middot; {esc(p["_date_display"])}' if show_date(p) else ""
     return f"""      <li data-search="{esc(search)}">
         <a class="tile" href="p/{p['slug']}/">
           <h3 class="tile-title">{esc(p['title'])}</h3>
@@ -164,7 +199,8 @@ def page(p):
     slug = p["slug"]
     url = f"{base}/p/{slug}/"
     title = p["title"]
-    desc = f"{p['conference']}, {p['_date_display']}. Poster, abstract and references by {SITE['name']}."
+    when = f", {p['_date_display']}" if show_date(p) else ""
+    desc = f"{p['conference']}{when}. Poster, abstract and references by {SITE['name']}."
     og_img = f"{base}/assets/og-image.png"
     if p.get("preview") and not re.match(r"https?://", p["preview"]):
         og_img = f"{base}/posters/{slug}/{p['preview']}"
@@ -178,27 +214,29 @@ def page(p):
                if p["_date_iso"] else esc(p["_date_display"]))
 
     buttons = []
-    pdf = ROOT / "posters" / slug / p["pdf"]
-    pdf_href = file_href(p, p["pdf"])
-    label = f"View poster (PDF, {human_size(pdf)})" if pdf.is_file() else "View poster (PDF)"
-    buttons.append(f'<li><a class="btn btn-primary" href="{pdf_href}" target="_blank" rel="noopener">{icon("doc")}{label}</a></li>')
-    buttons.append(f'<li><a class="btn" href="{pdf_href}" download>{icon("download")}Download poster</a></li>')
+    pdf_href = ""
+    if p.get("pdf"):
+        pdf = ROOT / "posters" / slug / p["pdf"]
+        pdf_href = file_href(p, p["pdf"])
+        label = f"View poster (PDF, {human_size(pdf)})" if pdf.is_file() else "View poster (PDF)"
+        buttons.append(f'<li><a class="btn btn-primary" href="{pdf_href}" target="_blank" rel="noopener">{icon("doc")}{label}</a></li>')
+        buttons.append(f'<li><a class="btn" href="{pdf_href}" download>{icon("download")}Download poster</a></li>')
     if p.get("abstract_url"):
-        buttons.append(f'<li><a class="btn" href="{file_href(p, p["abstract_url"])}">{icon("link")}Abstract</a></li>')
+        buttons.append(file_button(p, p["abstract_url"], "Abstract"))
     if p.get("references_pdf"):
-        buttons.append(f'<li><a class="btn" href="{file_href(p, p["references_pdf"])}">{icon("list")}References (PDF)</a></li>')
+        buttons.append(file_button(p, p["references_pdf"], "References", icon_name="list"))
     for ln in p.get("links", []):
         buttons.append(f'<li><a class="btn" href="{esc(extra_href(ln["url"]))}">{icon("link")}{esc(ln["label"])}</a></li>')
 
     body = []
     if p.get("preview"):
-        body.append(f'''    <a class="poster-preview" href="{pdf_href}" target="_blank" rel="noopener">
-      <img src="{file_href(p, p["preview"])}" alt="Preview of the poster: {esc(title)}">
-    </a>''')
+        img = f'<img src="{file_href(p, p["preview"])}" alt="Preview of the poster: {esc(title)}">'
+        body.append(f'    <a class="poster-preview" href="{pdf_href}" target="_blank" rel="noopener">{img}</a>' if pdf_href
+                    else f'    <div class="poster-preview">{img}</div>')
     if p.get("abstract"):
         body.append(f'''    <section id="abstract" aria-labelledby="abstract-h">
       <h2 id="abstract-h">Abstract</h2>
-      <p>{esc(p["abstract"])}</p>
+{abstract_html(p["abstract"])}
     </section>''')
     refs = p.get("references", [])
     if refs or p.get("references_pdf"):
@@ -212,6 +250,11 @@ def page(p):
     </section>''')
 
     authors = f'\n    <p class="authors">{esc(p["authors"])}</p>' if p.get("authors") else ""
+    if p.get("affiliation"):
+        authors += f'\n    <p class="affiliation">{esc(p["affiliation"])}</p>'
+    conf_line = f"<strong>{esc(p['conference'])}</strong>" + (f" &middot; {date_el}" if show_date(p) else "")
+    actions = ('\n    <ul class="btn-grid actions">\n'
+               + "\n".join("      " + b for b in buttons) + "\n    </ul>\n") if buttons else ""
     mail = SITE.get("email", "")
     contact = (f'<p>Questions? <a href="mailto:{esc(mail)}">{esc(mail)}</a></p>' if mail else "")
 
@@ -245,12 +288,8 @@ def page(p):
 
   <main id="main" class="wrap poster-page">
     <h1>{esc(title)}</h1>
-    <p class="conf"><strong>{esc(p['conference'])}</strong> &middot; {date_el}</p>{authors}
-
-    <ul class="btn-grid actions">
-      {chr(10).join("      " + b for b in buttons).strip()}
-    </ul>
-
+    <p class="conf">{conf_line}</p>{authors}
+{actions}
 {chr(10).join(body)}
   </main>
 
