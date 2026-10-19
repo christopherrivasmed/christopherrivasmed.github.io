@@ -153,6 +153,21 @@ def show_date(p):
     return not (re.fullmatch(r"\d{4}", d) and d in p["conference"])
 
 
+def contents(p):
+    """What a poster page actually offers, e.g. 'Poster and abstract' (only mentions references if it has them)."""
+    parts = []
+    if p.get("pdf"):
+        parts.append("poster")
+    if p.get("abstract") or p.get("abstract_url"):
+        parts.append("abstract")
+    if p.get("references") or p.get("references_pdf"):
+        parts.append("references")
+    if not parts:
+        return "Details"
+    text = ", ".join(parts[:-1]) + (" and " if len(parts) > 1 else "") + parts[-1]
+    return text[0].upper() + text[1:]
+
+
 def file_button(p, value, label, icon_name=None):
     """Button for a field that is a web link or a file in the poster's folder (files show type and size)."""
     href = file_href(p, value)
@@ -187,7 +202,7 @@ def tile(p, prefix=""):
         <a class="tile" href="{prefix}p/{p['slug']}/">
           <h3 class="tile-title">{esc(p['title'])}</h3>
           <p class="tile-meta">{esc(p['conference'])}{date_html}</p>
-          <p class="tile-cta">Poster, abstract and references {icon('chevron')}</p>
+          <p class="tile-cta">{contents(p)} {icon('chevron')}</p>
         </a>
       </li>
 """
@@ -216,7 +231,7 @@ def archive_page(posters):
     """posters/index.html: every poster, with search."""
     base = SITE["base_url"].rstrip("/")
     url = f"{base}/posters/"
-    desc = f"All research posters by {SITE['name']}: titles, conferences, abstracts and references."
+    desc = f"All research posters by {SITE['name']}, with abstracts and poster PDFs."
     tiles = "".join(tile(p, "../") for p in posters) if posters else ""
     empty_note = "" if posters else '    <p>Posters coming soon.</p>\n'
     return f"""<!doctype html>
@@ -279,7 +294,7 @@ def page(p):
     url = f"{base}/p/{slug}/"
     title = p["title"]
     when = f", {p['_date_display']}" if show_date(p) else ""
-    desc = f"{p['conference']}{when}. Poster, abstract and references by {SITE['name']}."
+    desc = f"{p['conference']}{when}. {contents(p)} by {SITE['name']}."
     og_img = f"{base}/assets/og-image.png"
     if p.get("preview") and not re.match(r"https?://", p["preview"]):
         og_img = f"{base}/posters/{slug}/{p['preview']}"
