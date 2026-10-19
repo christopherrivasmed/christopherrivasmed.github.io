@@ -81,8 +81,8 @@ def human_size(path):
 
 
 def linkify(text):
-    """Escape text and turn URLs / doi:10.x/y into links."""
-    safe = esc(text)
+    """Escape text, turn *word* into italics (journal names, AMA style) and URLs / doi:10.x/y into links."""
+    safe = re.sub(r"\*([^*\n]+)\*", r"<em>\1</em>", esc(text))
 
     def repl(m):
         url = m.group(0)

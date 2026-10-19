@@ -87,7 +87,7 @@ who guesses the path. They contain nothing private (only the poster URL). If you
   "abstract": "Abstract text shown on the page (optional).",
   "abstract_url": "https://doi.org/... or abstract.pdf (optional)",
   "references": [
-    "Author A, Author B. Title. Journal. 2024;12(3):45-52. doi:10.1000/example"
+    "Author A, Author B. Title of article. *Journal Abbrev*. 2024;12(3):45-52. doi:10.1000/example"
   ],
   "references_pdf": "references.pdf",
   "preview": "preview.jpg",
@@ -102,7 +102,7 @@ who guesses the path. They contain nothing private (only the poster URL). If you
 | `pdf` | The poster PDF in the same folder (defaults to `poster.pdf` if that file exists). The page shows its size so people on slow Wi-Fi know what to expect. Leave it out until the poster is finished: the page then has no poster buttons yet. |
 | `authors`, `affiliation` | Optional author line and affiliation line under the conference. |
 | `abstract` | Optional text shown on the page, either one string or a list of paragraphs (a leading `Background:`, `Methods:`, `Results:` or `Conclusions:` is bolded). `abstract_url` adds an Abstract button: a web link, or a file in the poster's folder such as `abstract.pdf`. Use either or both. |
-| `references` | Optional list. Web addresses and `doi:10.xxxx/...` become clickable links automatically. |
+| `references` | Optional list, shown as a numbered list in the order given. Web addresses and `doi:10.xxxx/...` become clickable links automatically, and `*Journal Name*` (text between asterisks) is shown in italics, as AMA style requires for journal and book titles. Write each reference without its number. |
 | `references_pdf` | Optional standalone document (a file in the poster's folder). Adds a "References (PDF)" button and a download button in the References section. Use it instead of, or in addition to, the list. |
 | `preview` | Optional image of the poster (jpg or png, ideally under 300 KB) shown on the page, linking to the PDF. Handy on phones, where PDFs open slowly. Export the first page of your poster to an image. |
 | `links` | Optional extra buttons. A `url` starting with `/` or `#` points at your own site (for example `/#pub-rivas-2025` for the paper in your Publications list). |
