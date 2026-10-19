@@ -14,7 +14,7 @@ poster.json and re-run this script. Standard library only.
 poster.json fields
   title            required  poster title (shown at the top of the poster page)
   conference       required  where it was presented
-  date             required  "2026-04-18", "2026-04" or "2026" (anything else is shown as typed)
+  date             optional  "2026-04-18", "2026-04" or "2026" (anything else is shown as typed; may be left out)
   pdf              optional  poster PDF in the same folder (default "poster.pdf" if that file exists;
                              with no PDF the page simply has no poster buttons yet)
   authors          optional  author line
@@ -112,7 +112,7 @@ def load_posters():
         except json.JSONDecodeError as e:
             errors.append(f"posters/{slug}/poster.json: invalid JSON ({e})")
             continue
-        for key in ("title", "conference", "date"):
+        for key in ("title", "conference"):
             if not str(data.get(key, "")).strip():
                 errors.append(f"posters/{slug}/poster.json: missing '{key}'")
         if "pdf" not in data and (jf.parent / "poster.pdf").is_file():
@@ -148,6 +148,8 @@ def extra_href(url):
 def show_date(p):
     """Hide a year-only date when the conference name already contains it (e.g. 'Discovery Day 2026')."""
     d = p["_date_display"]
+    if not d:
+        return False
     return not (re.fullmatch(r"\d{4}", d) and d in p["conference"])
 
 
@@ -168,7 +170,7 @@ def abstract_html(text):
     paras = text if isinstance(text, list) else [text]
     out = []
     for para in paras:
-        m = re.match(r"(Background|Introduction|Objectives?|Purpose|Methods|Results|Conclusions?|Discussion):\s+", para)
+        m = re.match(r"(Background and Aims?|Background|Introduction|Objectives?|Purpose|Methods|Results|Conclusions?|Discussion):\s+", para)
         if m:
             out.append(f"      <p><strong>{esc(m.group(1))}:</strong> {esc(para[m.end():])}</p>")
         else:

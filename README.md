@@ -39,7 +39,7 @@ Pick a short slug: lowercase letters, digits and hyphens, for example `aans-2026
    python scripts/new_poster.py aans-2026
    ```
    This creates `posters/aans-2026/poster.json`.
-2. **Fill in `poster.json`** (see the field list below). Only `title`, `conference` and `date` are required.
+2. **Fill in `poster.json`** (see the field list below). Only `title` and `conference` are required.
 3. **Add the poster PDF** as `posters/aans-2026/poster.pdf`.
 4. **Build the pages.**
    ```bash
@@ -97,7 +97,8 @@ who guesses the path. They contain nothing private (only the poster URL). If you
 
 | Field | Notes |
 |---|---|
-| `title`, `conference`, `date` | Required. `date` can be `2026-04-25`, `2026-04` or `2026`. Posters are listed newest first; a date in any other form is shown as typed and listed last. |
+| `title`, `conference` | Required. |
+| `date` | Optional. `2026-04-25`, `2026-04` or `2026`. Posters are listed newest first; a poster with no date (or a date in any other form) is listed last, and no date is shown. |
 | `pdf` | The poster PDF in the same folder (defaults to `poster.pdf` if that file exists). The page shows its size so people on slow Wi-Fi know what to expect. Leave it out until the poster is finished: the page then has no poster buttons yet. |
 | `authors`, `affiliation` | Optional author line and affiliation line under the conference. |
 | `abstract` | Optional text shown on the page, either one string or a list of paragraphs (a leading `Background:`, `Methods:`, `Results:` or `Conclusions:` is bolded). `abstract_url` adds an Abstract button: a web link, or a file in the poster's folder such as `abstract.pdf`. Use either or both. |
