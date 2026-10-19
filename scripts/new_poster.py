@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Create the permanent redirect page p/<slug>/index.html for a new poster.
+"""Start a new poster: creates posters/<slug>/poster.json to fill in.
 
 Usage:  python scripts/new_poster.py my-slug
 
-The slug becomes the QR-code path (/p/my-slug/) and the poster anchor (/#poster-my-slug).
+The slug becomes the permanent poster URL (/p/my-slug/) that the QR code points to.
 Use lowercase letters, digits and hyphens only. Never rename a slug after printing a poster.
 """
 import re
@@ -12,53 +12,33 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 
-TEMPLATE = """<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Redirecting to poster...</title>
-  <meta name="robots" content="noindex">
-  <meta name="color-scheme" content="light dark">
-  <!--
-    Permanent redirect for poster "{slug}". Do not rename or delete this folder once the poster is printed.
-    The delay is 0 seconds. If you enable GoatCounter below, change content="0; ..." to content="1; ..."
-    so the page view has time to be counted before the redirect.
-  -->
-  <meta http-equiv="refresh" content="0; url=/#poster-{slug}">
-  <link rel="canonical" href="https://christopherrivasmed.github.io/#poster-{slug}">
-  <style>
-    :root {{ color-scheme: light dark; }}
-    body {{ font: 1.1rem/1.6 system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; margin: 0; padding: 2rem 1rem; text-align: center; }}
-    a {{ font-weight: 700; }}
-  </style>
-  <!-- OPTIONAL ANALYTICS (GoatCounter), disabled. Uncomment and replace YOURCODE to count scans of this poster.
-  <script data-goatcounter="https://YOURCODE.goatcounter.com/count"
-          async src="https://gc.zgo.at/count.js"></script>
-  -->
-</head>
-<body>
-  <p>Taking you to the poster page&hellip;</p>
-  <p><a href="/#poster-{slug}">Tap here if you are not redirected</a></p>
-  <script>location.replace("/#poster-{slug}");</script>
-</body>
-</html>
+TEMPLATE = """{
+  "title": "Poster title goes here",
+  "conference": "Conference name",
+  "date": "2026-01-31",
+  "authors": "Rivas CA, Coauthor A, Coauthor B",
+  "keywords": [],
+  "pdf": "poster.pdf",
+  "abstract": "",
+  "abstract_url": "",
+  "references_pdf": "",
+  "references": [
+    "Author A, Author B. Title of paper. Journal. 2024;12(3):45-52. doi:10.0000/example"
+  ],
+  "links": []
+}
 """
 
-CARD = """
-Now add this card inside the Posters section of index.html (newest first):
+NEXT = """
+Created posters/{slug}/poster.json
 
-      <article class="poster" id="poster-{slug}">
-        <h3>POSTER TITLE</h3>
-        <p class="meta">CONFERENCE &middot; MONTH YYYY</p>
-        <ul>
-          <li><a href="posters/{slug}.pdf">Poster PDF</a></li>
-          <li><a href="ABSTRACT_URL">Abstract</a></li>
-          <li><a href="#pub-rivas-2025">Related paper</a></li>   <!-- delete if none -->
-        </ul>
-      </article>
-
-Then copy your poster PDF to posters/{slug}.pdf and run:  python scripts/make_qr.py {slug}
+Next steps:
+  1. Edit posters/{slug}/poster.json (title, conference, date, references...).
+     Delete any field you do not need; "title", "conference" and "date" are required.
+  2. Put the poster PDF at posters/{slug}/poster.pdf
+     (optional: references.pdf, abstract.pdf, preview.jpg in the same folder; see README)
+  3. python scripts/build_posters.py        builds the poster page and the home-page tile
+  4. python scripts/make_qr.py {slug}       makes qr/{slug}.svg and qr/{slug}.png
 """
 
 
@@ -68,14 +48,13 @@ def main() -> int:
         print("Error: give exactly one slug made of lowercase letters, digits and hyphens.")
         return 2
     slug = sys.argv[1]
-    out = ROOT / "p" / slug / "index.html"
+    out = ROOT / "posters" / slug / "poster.json"
     if out.exists():
         print(f"Refusing to overwrite existing {out.relative_to(ROOT)}")
         return 1
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(TEMPLATE.format(slug=slug), encoding="utf-8", newline="\n")
-    print(f"Created {out.relative_to(ROOT)}")
-    print(CARD.format(slug=slug))
+    out.write_text(TEMPLATE, encoding="utf-8", newline="\n")
+    print(NEXT.format(slug=slug))
     return 0
 
 

@@ -5,12 +5,14 @@ Usage:
   pip install segno
   python scripts/make_qr.py example
   python scripts/make_qr.py my-slug --size-in 2.5      # printed width of the whole code incl. quiet zone
-  python scripts/make_qr.py my-slug --base-url https://example.org   # if you use a custom domain
+  python scripts/make_qr.py my-slug --target references   # opens the poster page at its References
 
-The QR encodes  <base-url>/p/<slug>/  with error correction level Q and a 4-module quiet zone
-(the minimum in the QR standard). Print it at least ~2 x 2 inches / 5 x 5 cm, dark on light.
+The QR encodes  <base_url>/p/<slug>/  (base_url comes from site.json) with error correction level Q
+and a 4-module quiet zone (the minimum in the QR standard). Print it at least ~2 x 2 inches
+(5 x 5 cm), dark on light. The poster page must exist first (python scripts/build_posters.py).
 """
 import argparse
+import json
 import re
 import sys
 from pathlib import Path
@@ -21,7 +23,7 @@ except ImportError:
     sys.exit("segno is not installed. Run:  pip install segno")
 
 ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_BASE_URL = "https://christopherrivasmed.github.io"   # change here if you get a custom domain
+DEFAULT_BASE_URL = json.loads((ROOT / "site.json").read_text(encoding="utf-8"))["base_url"]   # edit site.json to change
 QUIET_ZONE = 4        # modules; QR standard minimum
 DPI = 600
 
@@ -30,6 +32,8 @@ def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("slug", help="poster slug, e.g. example (must match p/<slug>/)")
     ap.add_argument("--base-url", default=DEFAULT_BASE_URL, help=f"site root (default {DEFAULT_BASE_URL})")
+    ap.add_argument("--target", choices=["page", "references"], default="page",
+                    help="page = top of the poster page (default); references = jump to its References section")
     ap.add_argument("--size-in", type=float, default=2.0, help="printed size in inches (default 2.0)")
     ap.add_argument("--dark", default="#000000", help="module color (default black)")
     ap.add_argument("--light", default="#ffffff", help="background color (default white)")
@@ -38,9 +42,10 @@ def main() -> int:
     if not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", args.slug):
         sys.exit("Slug must be lowercase letters, digits and hyphens only.")
     if not (ROOT / "p" / args.slug / "index.html").exists():
-        sys.exit(f"p/{args.slug}/index.html does not exist. Run: python scripts/new_poster.py {args.slug}")
+        sys.exit(f"p/{args.slug}/index.html does not exist. Run: python scripts/build_posters.py")
 
-    url = f"{args.base_url.rstrip('/')}/p/{args.slug}/"
+    url = f"{args.base_url.rstrip('/')}/p/{args.slug}/" + ("#references" if args.target == "references" else "")
+    name = args.slug + ("-references" if args.target == "references" else "")
     qr = segno.make(url, error="q", micro=False, boost_error=False)
 
     total_modules = qr.symbol_size(border=QUIET_ZONE)[0]
@@ -48,8 +53,8 @@ def main() -> int:
 
     out_dir = ROOT / "qr"
     out_dir.mkdir(exist_ok=True)
-    svg_path = out_dir / f"{args.slug}.svg"
-    png_path = out_dir / f"{args.slug}.png"
+    svg_path = out_dir / f"{name}.svg"
+    png_path = out_dir / f"{name}.png"
 
     qr.save(svg_path, scale=10, border=QUIET_ZONE, dark=args.dark, light=args.light,
             title=f"QR code for {url}", desc="Scan to open the poster page.")

@@ -1,65 +1,61 @@
 # Christopher A. Rivas: academic landing page
 
-A single-page, mobile-first site for research posters. Plain HTML and CSS, no framework, no build step.
+A single-page, mobile-first site for research posters. Plain HTML and CSS, no framework, no hosting build step.
 Live at **https://christopherrivasmed.github.io/** (GitHub Pages, deployed from the `main` branch).
 
+How posters work:
+
+* The home page has a **search box and one tile per poster**.
+* Each tile opens that poster's own page at `/p/<slug>/`: poster title at the top, then the conference and
+  date, the poster PDF, the abstract, and the **references**.
+* The **QR code on the printed poster points straight at that page**, so people scanning it can see your references.
+
 ```
-index.html            the whole page (About, Publications, Links, CV, Posters)
-css/style.css         styles (light and dark mode)
-cv/Rivas_CV.pdf       your CV
-posters/<slug>.pdf    one PDF per poster
-p/<slug>/index.html   permanent redirect that a poster's QR code points to
-qr/<slug>.svg|.png    QR codes (not linked from the page)
-assets/               headshot (photo.jpg), favicon, link-preview image
-scripts/              new_poster.py, make_qr.py, check_site.py, update_date.py
+index.html               the home page (About, Publications, Links, Social, CV, Posters)
+site.json                site name, base URL, contact email, optional GoatCounter code
+css/style.css            styles (light and dark mode)
+cv/Rivas_CV.pdf          your CV
+posters/<slug>/          everything for one poster:
+    poster.json            title, conference, date, references... (you edit this)
+    poster.pdf             the poster (required)
+    references.pdf         optional standalone references document
+    preview.jpg            optional preview image of the poster
+p/<slug>/index.html      GENERATED poster page (the QR target). Do not edit by hand.
+qr/<slug>.svg|.png       QR codes (not linked from the page)
+assets/                  headshot (photo.jpg), favicon, link-preview image
+scripts/                 new_poster.py, build_posters.py, make_qr.py, check_site.py, update_date.py
 ```
-
-## Finding what still needs filling in
-
-```bash
-python scripts/check_site.py
-```
-
-Lists every remaining `PLACEHOLDER` and checks that redirects, linked files and posters line up.
-Run it before each push. It also warns if a phone number, email address or street address ever
-appears in a file. Your email will appear on the page because you put it there on purpose.
-
-## Test locally
-
-```bash
-python -m http.server 8000
-```
-
-Open <http://localhost:8000/>, then <http://localhost:8000/p/example/>. It should bounce to
-`/#poster-example` with the poster highlighted. Stop the server with Ctrl+C.
-Always serve from the repo root. Redirects use root-relative paths (`/#poster-...`), so opening
-the files by double-clicking will not work.
 
 ## Add a new poster (about 5 minutes)
 
 Pick a short slug: lowercase letters, digits and hyphens, for example `aans-2026`.
-**A slug is permanent.** It is printed on the poster, so never rename it.
+**A slug is permanent.** It is printed on the poster as part of the QR code, so never rename it.
 
-1. **Create the redirect page.**
+1. **Create the poster folder.**
    ```bash
    python scripts/new_poster.py aans-2026
    ```
-   This makes `p/aans-2026/index.html` and prints a card to paste.
-2. **Add the poster card.** Paste the printed `<article>` into the Posters section of `index.html`
-   (newest first). Its `id` must be `poster-aans-2026`. Fill in title, conference, date and links.
-   Delete the "Related paper" line if there is none, or point it at a publication's `id`
-   (for example `#pub-rivas-2025`).
-3. **Add the poster PDF** as `posters/aans-2026.pdf`.
-4. **Generate the QR code.**
+   This creates `posters/aans-2026/poster.json`.
+2. **Fill in `poster.json`** (see the field list below). Only `title`, `conference` and `date` are required.
+3. **Add the poster PDF** as `posters/aans-2026/poster.pdf`.
+4. **Build the pages.**
+   ```bash
+   python scripts/build_posters.py
+   ```
+   This writes `p/aans-2026/index.html` and adds the tile to the home page (newest poster first).
+   Run it again every time you edit a `poster.json`.
+5. **Generate the QR code.**
    ```bash
    pip install segno          # once
    python scripts/make_qr.py aans-2026
    ```
-   This writes `qr/aans-2026.svg` (vector, use this for print) and `qr/aans-2026.png` (600 dpi).
-   It encodes `https://christopherrivasmed.github.io/p/aans-2026/` at error-correction level Q with a
-   4-module quiet zone. Use `--size-in 3` to set the PNG's printed size. Keep the white border
-   when placing it on the poster, print dark on light, and make it at least about 2 x 2 inches (5 x 5 cm).
-5. **Check and publish.**
+   This writes `qr/aans-2026.svg` (vector, use this for print) and `qr/aans-2026.png` (600 dpi). It encodes
+   `https://christopherrivasmed.github.io/p/aans-2026/` at error-correction level Q with a 4-module quiet zone.
+   Use `--size-in 3` to set the PNG's printed size. Keep the white border when you place it on the poster, print
+   dark on light, and make it at least about 2 x 2 inches (5 x 5 cm).
+   If you want a second QR that opens the page scrolled straight to the references, use
+   `python scripts/make_qr.py aans-2026 --target references`.
+6. **Check and publish.**
    ```bash
    python scripts/check_site.py
    python scripts/update_date.py        # refreshes the footer "Last updated" date
@@ -69,16 +65,71 @@ Pick a short slug: lowercase letters, digits and hyphens, for example `aans-2026
    ```
    GitHub Pages updates in about a minute. Scan the QR code from your phone **before** you print.
 
-The QR files in `qr/` are not linked from the page, but they are in the repository and therefore
-reachable by anyone who guesses the path. They contain nothing private (only the poster URL).
-If you would rather not publish them, add `qr/` to a `.gitignore` and keep them on your computer only.
+The QR files in `qr/` are not linked from the page, but they are in the repository and therefore reachable by anyone
+who guesses the path. They contain nothing private (only the poster URL). If you would rather not publish them, add
+`qr/` to a `.gitignore` and keep them on your computer only.
 
-### What visitors see
+### `poster.json` fields
 
-`/p/<slug>/` redirects (meta refresh, with a JavaScript fallback and a visible link) to
-`/#poster-<slug>`. On the main page, a small script highlights that poster card and shows a
-"You scanned a poster" box at the top with the poster PDF, abstract and related-paper buttons.
-Without JavaScript they still land on the highlighted card.
+```json
+{
+  "title": "Poster title",
+  "conference": "Conference name",
+  "date": "2026-04-25",
+  "authors": "Rivas CA, Coauthor A",
+  "keywords": ["stroke", "thrombectomy"],
+  "pdf": "poster.pdf",
+  "abstract": "Abstract text shown on the page (optional).",
+  "abstract_url": "https://doi.org/... or abstract.pdf (optional)",
+  "references": [
+    "Author A, Author B. Title. Journal. 2024;12(3):45-52. doi:10.1000/example"
+  ],
+  "references_pdf": "references.pdf",
+  "preview": "preview.jpg",
+  "links": [ { "label": "Related paper", "url": "/#pub-rivas-2025" } ]
+}
+```
+
+| Field | Notes |
+|---|---|
+| `title`, `conference`, `date` | Required. `date` can be `2026-04-25`, `2026-04` or `2026`. Posters are listed newest first; a date in any other form is shown as typed and listed last. |
+| `pdf` | The poster PDF in the same folder. Defaults to `poster.pdf`. The page shows its size so people on slow Wi-Fi know what to expect. |
+| `authors` | Optional author line under the conference. |
+| `abstract` | Optional text shown on the page. `abstract_url` adds an Abstract button: a web link, or a file in the poster's folder. Use either or both. |
+| `references` | Optional list. Web addresses and `doi:10.xxxx/...` become clickable links automatically. |
+| `references_pdf` | Optional standalone document (a file in the poster's folder). Adds a "References (PDF)" button and a download button in the References section. Use it instead of, or in addition to, the list. |
+| `preview` | Optional image of the poster (jpg or png, ideally under 300 KB) shown on the page, linking to the PDF. Handy on phones, where PDFs open slowly. Export the first page of your poster to an image. |
+| `links` | Optional extra buttons. A `url` starting with `/` or `#` points at your own site (for example `/#pub-rivas-2025` for the paper in your Publications list). |
+| `keywords` | Optional words that only the search box looks at. |
+
+Delete any field you do not need. Do not edit `p/<slug>/index.html` or the tiles between the `POSTERS:START` and
+`POSTERS:END` markers in `index.html`: they are overwritten each time you run `build_posters.py`.
+
+### Search
+
+The Posters section has a search box (it appears when JavaScript is on; without JavaScript every poster is simply
+listed). It matches every word you type against the title, conference, date, authors and keywords, ignoring case and
+accents, so `aans 2026` or `thrombectomy cns` both work. Opening `https://christopherrivasmed.github.io/?q=aans`
+pre-fills the search.
+
+## Test locally
+
+```bash
+python -m http.server 8000
+```
+
+Open <http://localhost:8000/>, click the example tile, and use the back link. Stop the server with Ctrl+C.
+Always serve from the repo root; opening the files by double-clicking will not work for some links.
+
+## Before every push
+
+```bash
+python scripts/check_site.py
+```
+
+It checks that the poster pages and tiles are up to date with the `poster.json` files, that every linked file exists
+(poster PDFs, CV, images), and that no phone number, unexpected email address or street address appears in any text
+file. It also lists every remaining `PLACEHOLDER`.
 
 ## Swap the CV
 
@@ -90,25 +141,28 @@ The link on the page and any printed references keep working. Keep it under a fe
 * **Profile and social buttons:** in the `Links` and `Social media` sections of `index.html`, edit the
   `href` of the button. Delete a whole `<li>...</li>` to remove one, or copy one to add another.
   Use clean profile URLs without tracking parameters such as `?ev=...` or `?isSelfProfile=true`.
-* **Email:** edit the address in the header (both the `mailto:` and the visible text). If you
-  change it, add it to `ALLOWED_EMAILS` in `scripts/check_site.py` so the privacy scan accepts it.
-* **Photo:** `assets/photo.jpg` is a 420 x 420 square crop. To change it, save a new square JPEG
-  with the same name (strip location metadata first; re-saving through Pillow or an image
-  editor's "export" does this). Keep the `alt` text meaningful.
+* **Email:** edit the address in the header of `index.html` (both the `mailto:` and the visible text) and in
+  `site.json` (shown on poster pages). If you change it, add it to `ALLOWED_EMAILS` in `scripts/check_site.py`
+  so the privacy scan accepts it, then run `python scripts/build_posters.py`.
+* **Photo:** `assets/photo.jpg` is a 420 x 420 square crop. To change it, save a new square JPEG with the same
+  name (strip location metadata first; re-saving through Pillow or an image editor's "export" does this).
+  Keep the `alt` text meaningful.
 * **Publications:** copy the `<li id="pub-...">` block and edit it. Newest first.
 * **Link-preview image:** replace `assets/og-image.png` (1200 x 630 PNG or JPG). Chat apps cache previews, so a
   changed image can take a while to appear.
+* **Site address:** if the site ever moves (for example to a custom domain), update `base_url` in `site.json`, the
+  `canonical` and `og:` tags in `index.html`, run `python scripts/build_posters.py`, and **regenerate every QR code**.
 
 ## Analytics (optional, off by default)
 
-[GoatCounter](https://www.goatcounter.com) is free and does not use cookies. To count scans per poster:
+[GoatCounter](https://www.goatcounter.com) is free and does not use cookies. Poster pages are now the real
+destination of each QR code, so each `/p/<slug>/` shows up as its own row in your dashboard: that is your scan count
+per poster.
 
-1. Create a GoatCounter site and note its code.
-2. In `index.html` and in each `p/<slug>/index.html`, uncomment the `<script data-goatcounter=...>` tag and replace `YOURCODE`.
-3. In each `p/<slug>/index.html`, change `content="0; url=..."` to `content="1; url=..."` so the visit is
-   recorded before the redirect.
-
-Each `/p/<slug>/` path then shows up as its own row in your GoatCounter dashboard. Remove the snippet to turn it off.
+1. Create a GoatCounter site and note its code (the part before `.goatcounter.com`).
+2. Put it in `site.json` as `"goatcounter_code": "yourcode"` and run `python scripts/build_posters.py`.
+   Every poster page then includes the counter. To turn it off, set it back to `""` and rebuild.
+3. To count home-page visits too, uncomment the snippet in the `<head>` of `index.html` and replace `YOURCODE`.
 
 ## Deploying
 
