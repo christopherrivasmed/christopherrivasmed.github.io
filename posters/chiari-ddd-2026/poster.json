@@ -1,9 +1,12 @@
 {
-  "title": "The Effects of a Linear Dural Incision on 60-Day Post-Operative Complications for Chiari I Malformation Decompression",
+  "title": "The Effects of a Linear Dural Incision on 60-Day Postoperative Complications for Chiari I Malformation Decompression",
   "conference": "Drexel Discovery Day 2026",
   "date": "2026",
-  "authors": "Christopher A. Rivas and Erol Veznedaroglu",
-  "affiliation": "College of Medicine, Drexel University, Philadelphia, PA, USA",
+  "authors": "Christopher A. Rivas¹ and Erol Veznedaroglu¹,²",
+  "affiliation": [
+    "¹College of Medicine, Drexel University, Philadelphia, PA, USA",
+    "²Department of Neurosurgery, Global Neurosciences Institute, Atlantic City, NJ, USA"
+  ],
   "pdf": "poster.pdf",
   "preview": "preview.jpg",
   "keywords": [

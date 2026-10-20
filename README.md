@@ -100,7 +100,7 @@ who guesses the path. They contain nothing private (only the poster URL). If you
 | `title`, `conference` | Required. |
 | `date` | Optional. `2026-04-25`, `2026-04` or `2026`. Posters are listed newest first; a poster with no date (or a date in any other form) is listed last, and no date is shown. |
 | `pdf` | The poster PDF in the same folder (defaults to `poster.pdf` if that file exists). The page shows its size so people on slow Wi-Fi know what to expect. Leave it out until the poster is finished: the page then has no poster buttons yet. |
-| `authors`, `affiliation` | Optional author line and affiliation line under the conference. |
+| `authors`, `affiliation` | Optional author line and affiliation line(s) under the conference. `affiliation` can be a list, one line per affiliation (type superscripts such as ¹ and ² into the text if you use them). |
 | `abstract` | Optional text shown on the page, either one string or a list of paragraphs (a leading `Background:`, `Methods:`, `Results:` or `Conclusions:` is bolded). `abstract_url` adds an Abstract button: a web link, or a file in the poster's folder such as `abstract.pdf`. Use either or both. |
 | `references` | Optional list, shown as a numbered list in the order given. Web addresses and `doi:10.xxxx/...` become clickable links automatically, and `*Journal Name*` (text between asterisks) is shown in italics, as AMA style requires for journal and book titles. Write each reference without its number. |
 | `references_pdf` | Optional standalone document (a file in the poster's folder). Adds a "References (PDF)" button and a download button in the References section. Use it instead of, or in addition to, the list. |

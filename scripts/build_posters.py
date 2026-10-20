@@ -18,7 +18,7 @@ poster.json fields
   pdf              optional  poster PDF in the same folder (default "poster.pdf" if that file exists;
                              with no PDF the page simply has no poster buttons yet)
   authors          optional  author line
-  affiliation      optional  affiliation line under the authors
+  affiliation      optional  affiliation line under the authors (a string, or a list: one line each)
   abstract         optional  abstract text shown on the page: a string, or a list of paragraphs
                              (a leading "Background:", "Methods:", "Results:" or "Conclusions:" is bolded)
   abstract_url     optional  link to the abstract (https://... or a file in the poster's folder)
@@ -342,7 +342,8 @@ def page(p):
 
     authors = f'\n    <p class="authors">{esc(p["authors"])}</p>' if p.get("authors") else ""
     if p.get("affiliation"):
-        authors += f'\n    <p class="affiliation">{esc(p["affiliation"])}</p>'
+        affs = p["affiliation"] if isinstance(p["affiliation"], list) else [p["affiliation"]]
+        authors += '\n    <p class="affiliation">' + "<br>".join(esc(a) for a in affs) + "</p>"
     conf_line = f"<strong>{esc(p['conference'])}</strong>" + (f" &middot; {date_el}" if show_date(p) else "")
     actions = ('\n    <ul class="btn-grid actions">\n'
                + "\n".join("      " + b for b in buttons) + "\n    </ul>\n") if buttons else ""
