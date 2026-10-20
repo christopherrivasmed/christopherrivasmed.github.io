@@ -58,7 +58,7 @@ Pick a short slug: lowercase letters, digits and hyphens, for example `aans-2026
    Use `--size-in 3` to set the PNG's printed size. Keep the white border when you place it on the poster, print
    dark on light, and make it at least about 2 x 2 inches (5 x 5 cm).
    If you want a second QR that opens the page scrolled straight to the references, use
-   `python scripts/make_qr.py aans-2026 --target references`.
+   `python scripts/make_qr.py aans-2026 --target references`. `python scripts/make_qr.py --site` makes a QR for the home page (`qr/site-home.*`).
 6. **Check and publish.**
    ```bash
    python scripts/check_site.py
