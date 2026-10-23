@@ -19,6 +19,7 @@ TEXT_EXT = {".html", ".css", ".js", ".md", ".py", ".svg", ".txt", ".json", ".xml
 SKIP_DIRS = {".git", "__pycache__"}
 problems = []
 ALLOWED_EMAILS = {"car452@drexel.edu"}   # addresses you deliberately publish on the page
+ALLOWED_PHONES = {"6267207847"}          # phone numbers you deliberately publish (digits only), e.g. on your CV
 
 
 def text_files():
@@ -55,13 +56,21 @@ for page in pages:
 phone = re.compile(r"(?<![\w.])(?:\+?1[\s.-]?)?\(?\b\d{3}\)?[\s.-]\d{3}[\s.-]\d{4}\b")
 email = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
 street = re.compile(r"\b\d{1,5}\s+(?:[A-Z][a-z]+\s+){1,3}(?:St|Street|Ave|Avenue|Rd|Road|Blvd|Dr|Drive|Ln|Lane|Way|Ct|Court)\b")
+def is_allowed(rx, value):
+    if rx is email:
+        return value in ALLOWED_EMAILS
+    if rx is phone:
+        return re.sub(r"\D", "", value) in ALLOWED_PHONES
+    return False
+
+
 for p in text_files():
     if p.name == "check_site.py":
         continue
     for n, line in enumerate(p.read_text(encoding="utf-8", errors="replace").splitlines(), 1):
         for label, rx in (("phone number", phone), ("email address", email), ("street address", street)):
             m = rx.search(line)
-            if m and not (rx is email and m.group(0) in ALLOWED_EMAILS):
+            if m and not is_allowed(rx, m.group(0)):
                 problems.append(f"{p.relative_to(ROOT)}:{n}: possible {label}: {m.group(0)}")
 
 # 3b. the same scan inside PDFs (CV, posters, abstracts); needs: pip install pymupdf
@@ -79,7 +88,7 @@ if pymupdf:
         text = "\n".join(page.get_text() for page in doc) + "\n" + meta
         for label, rx in (("phone number", phone), ("email address", email), ("street address", street)):
             for m in rx.finditer(text):
-                if not (rx is email and m.group(0) in ALLOWED_EMAILS):
+                if not is_allowed(rx, m.group(0)):
                     problems.append(f"{pdf.relative_to(ROOT)}: possible {label} inside the PDF: {m.group(0)}")
 
 print("Checks")
