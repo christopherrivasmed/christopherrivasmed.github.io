@@ -150,6 +150,11 @@ file. It also lists every remaining `PLACEHOLDER`.
 Replace `cv/Rivas_CV.pdf` with your new file, keeping the same filename, then commit and push.
 The link on the page and any printed references keep working. Keep it under a few MB for slow Wi-Fi.
 
+**Use a public version of your CV.** The repository is public, so the PDF must not contain your phone number or home
+address, and its file properties (author, title) should be yours. The best way is to export a separate "web" copy from your
+Word source without the phone number. `python scripts/check_site.py` scans PDFs for phone numbers, street addresses and
+unexpected email addresses (it needs `pip install pymupdf`), so it flags a CV that still has them.
+
 ## Edit links and text
 
 * **Profile and social buttons:** in the `Links` and `Social media` sections of `index.html`, edit the

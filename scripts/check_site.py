@@ -64,6 +64,24 @@ for p in text_files():
             if m and not (rx is email and m.group(0) in ALLOWED_EMAILS):
                 problems.append(f"{p.relative_to(ROOT)}:{n}: possible {label}: {m.group(0)}")
 
+# 3b. the same scan inside PDFs (CV, posters, abstracts); needs: pip install pymupdf
+try:
+    import pymupdf
+except ImportError:
+    pymupdf = None
+    print("note: PDFs were NOT scanned for phone numbers/addresses (pip install pymupdf to enable)")
+if pymupdf:
+    for pdf in sorted(ROOT.rglob("*.pdf")):
+        if set(pdf.relative_to(ROOT).parts) & SKIP_DIRS:
+            continue
+        doc = pymupdf.open(pdf)
+        meta = " ".join(str(v) for v in doc.metadata.values() if v)
+        text = "\n".join(page.get_text() for page in doc) + "\n" + meta
+        for label, rx in (("phone number", phone), ("email address", email), ("street address", street)):
+            for m in rx.finditer(text):
+                if not (rx is email and m.group(0) in ALLOWED_EMAILS):
+                    problems.append(f"{pdf.relative_to(ROOT)}: possible {label} inside the PDF: {m.group(0)}")
+
 print("Checks")
 print("  poster slugs :", ", ".join(slugs) or "(none)")
 print("  problems     :", len(problems))
