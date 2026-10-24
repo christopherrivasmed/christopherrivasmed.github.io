@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Sanity checks to run before every push:  python scripts/check_site.py
 
-1. Poster pages and home-page tiles are up to date with posters/<slug>/poster.json
-   (if not, run: python scripts/build_posters.py).
+1. Poster pages, talk pages, the presentations page and the home-page list are up to date with
+   posters/<slug>/poster.json and talks/<slug>/talk.json (if not, run: python scripts/build_site.py).
 2. Every local file linked from the pages exists (CV, poster PDFs, images...).
 3. No phone numbers, unexpected email addresses or street addresses in any text file.
 4. Lists every remaining PLACEHOLDER so you know what is still to fill in.
@@ -28,20 +28,24 @@ def text_files():
             yield p
 
 
-slugs = sorted(p.parent.name for p in (ROOT / "posters").glob("*/poster.json"))
+poster_slugs = sorted(p.parent.name for p in (ROOT / "posters").glob("*/poster.json"))
+talk_slugs = sorted(p.parent.name for p in (ROOT / "talks").glob("*/talk.json"))
+slugs = poster_slugs + talk_slugs
 
 # 1. generated files current?
-res = subprocess.run([sys.executable, str(ROOT / "scripts" / "build_posters.py"), "--check"],
+res = subprocess.run([sys.executable, str(ROOT / "scripts" / "build_site.py"), "--check"],
                      capture_output=True, text=True, cwd=ROOT)
 for line in (res.stdout + res.stderr).splitlines():
     if line.startswith(("error:", "out of date:", "warning:")):
-        problems.append(line if not line.startswith("out of date:") else line + " (run build_posters.py)")
-for slug in slugs:
-    if not (ROOT / "p" / slug / "index.html").exists():
-        problems.append(f"p/{slug}/index.html is missing (run build_posters.py)")
+        problems.append(line if not line.startswith("out of date:") else line + " (run build_site.py)")
+for folder, group in (("p", poster_slugs), ("t", talk_slugs)):
+    for slug in group:
+        if not (ROOT / folder / slug / "index.html").exists():
+            problems.append(f"{folder}/{slug}/index.html is missing (run build_site.py)")
 
 # 2. local links exist
-pages = [ROOT / "index.html", ROOT / "posters" / "index.html", *sorted((ROOT / "p").glob("*/index.html"))]
+pages = [ROOT / "index.html", ROOT / "presentations" / "index.html",
+         *sorted((ROOT / "p").glob("*/index.html")), *sorted((ROOT / "t").glob("*/index.html"))]
 for page in pages:
     html = re.sub(r"<!--.*?-->", "", page.read_text(encoding="utf-8"), flags=re.S)
     for ref in re.findall(r'(?:href|src)="([^"]+)"', html):
@@ -92,7 +96,8 @@ if pymupdf:
                     problems.append(f"{pdf.relative_to(ROOT)}: possible {label} inside the PDF: {m.group(0)}")
 
 print("Checks")
-print("  poster slugs :", ", ".join(slugs) or "(none)")
+print("  posters      :", ", ".join(poster_slugs) or "(none)")
+print("  talks        :", ", ".join(talk_slugs) or "(none)")
 print("  problems     :", len(problems))
 for pr in problems:
     print("   -", pr)
@@ -102,11 +107,11 @@ print("\nRemaining PLACEHOLDERs")
 count = 0
 for p in text_files():
     rel = p.relative_to(ROOT)
-    if p.suffix.lower() in {".py", ".md", ".css", ".js"} or rel.parts[0] == "p" or rel.as_posix() == "posters/index.html":
+    if p.suffix.lower() in {".py", ".md", ".css", ".js"} or rel.parts[0] in ("p", "t") or rel.as_posix() == "presentations/index.html":
         continue
     text = p.read_text(encoding="utf-8")
     if rel.name == "index.html":
-        text = re.sub(r"<!-- POSTERS:START.*?<!-- POSTERS:END -->", "", text, flags=re.S)
+        text = re.sub(r"<!-- PRESENTATIONS:START.*?<!-- PRESENTATIONS:END -->", "", text, flags=re.S)
     for n, line in enumerate(text.splitlines(), 1):
         if "PLACEHOLDER" in line and not line.lstrip().startswith("<!--"):
             attr = re.search(r'(?:href|src)="([^"]*PLACEHOLDER[^"]*)"', line)

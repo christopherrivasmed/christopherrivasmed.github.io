@@ -1,32 +1,39 @@
 # Christopher A. Rivas: academic landing page
 
-A single-page, mobile-first site for research posters. Plain HTML and CSS, no framework, no hosting build step.
+A single-page, mobile-first site for research talks and posters. Plain HTML and CSS, no framework, no hosting build step.
 Live at **https://christopherrivasmed.github.io/** (GitHub Pages, deployed from the `main` branch).
 
-How posters work:
+How talks and posters work:
 
-* The home page shows only the **newest few posters** (3 by default) as tiles, with a **"View all posters" button**.
-* That button opens `/posters/`, the full list with a **search box**.
-* Each tile opens that poster's own page at `/p/<slug>/`: poster title at the top, then the conference and
-  date, the poster PDF, the abstract, and the **references**.
-* The **QR code on the printed poster points straight at that page**, so people scanning it can see your references.
+* The home page has a **Talks and Presentations** section: the newest **2 talks** and **2 posters** as tiles
+  (change the numbers in `site.json`), then a **"View all talks and presentations" button**.
+* That button opens `/presentations/`: every talk and poster, newest first, with **Talks / Posters filter buttons and a search box**.
+* Each **poster** has its own page at `/p/<slug>/`: title, conference, date, poster PDF, abstract and **references**.
+* Each **talk** has its own page at `/t/<slug>/`: title, venue, date, an "About this talk" background, the **video** with
+  clickable **chapters**, and optional slides and references.
+* **QR codes** point straight at those pages (`/p/<slug>/` or `/t/<slug>/`).
 
 ```
-index.html               the home page (About, CV, Publications, Posters, Links, Social media)
-site.json                site name, base URL, contact email, how many posters show on the home page, optional GoatCounter code
-js/poster-search.js      the search box on the all-posters page
+index.html               the home page (About, CV, Publications, Talks and Presentations, Links, Social media)
+site.json                site name, base URL, email, how many talks/posters show on the home page, optional GoatCounter code
+js/presentations.js      filters and search on the presentations page
+js/video-embed.js        play button and chapter jumping on talk pages
 css/style.css            styles (light and dark mode)
 cv/Rivas_CV.pdf          your CV
 posters/<slug>/          everything for one poster:
     poster.json            title, conference, date, references... (you edit this)
-    poster.pdf             the poster (required)
-    references.pdf         optional standalone references document
-    preview.jpg            optional preview image of the poster
+    poster.pdf             the poster
+    abstract.pdf, references.pdf, preview.jpg   optional
+talks/<slug>/            everything for one talk:
+    talk.json              title, venue, date, background, video, chapters... (you edit this)
+    thumb.jpg              the video's thumbnail (shown until play is tapped)
+    slides.pdf             optional
 p/<slug>/index.html      GENERATED poster page (the QR target). Do not edit by hand.
-posters/index.html       GENERATED list of all posters with search. Do not edit by hand.
+t/<slug>/index.html      GENERATED talk page. Do not edit by hand.
+presentations/index.html GENERATED list of all talks and posters. Do not edit by hand.
 qr/<slug>.svg|.png       QR codes (not linked from the page)
 assets/                  headshot (photo.jpg), favicon, link-preview image
-scripts/                 new_poster.py, build_posters.py, make_qr.py, check_site.py, update_date.py
+scripts/                 new_poster.py, new_talk.py, build_site.py, make_qr.py, check_site.py, update_date.py
 ```
 
 ## Add a new poster (about 5 minutes)
@@ -43,10 +50,10 @@ Pick a short slug: lowercase letters, digits and hyphens, for example `aans-2026
 3. **Add the poster PDF** as `posters/aans-2026/poster.pdf`.
 4. **Build the pages.**
    ```bash
-   python scripts/build_posters.py
+   python scripts/build_site.py
    ```
-   This writes `p/aans-2026/index.html`, adds the poster to the all-posters page, and updates the newest-posters
-   list on the home page (newest poster first).
+   This writes `p/aans-2026/index.html`, adds the poster to the presentations page, and updates the list on the
+   home page (newest first).
    Run it again every time you edit a `poster.json`.
 5. **Generate the QR code.**
    ```bash
@@ -109,22 +116,75 @@ who guesses the path. They contain nothing private (only the poster URL). If you
 | `keywords` | Optional words that only the search box looks at. |
 
 A conference name that already contains a year-only date (for example "Drexel Discovery Day 2026" with `"date": "2026"`)
-shows the name once. Give the exact date (`2026-04-25`) and it is shown too. Delete any field you do not need. Do not edit `p/<slug>/index.html`, `posters/index.html` or the part between the `POSTERS:START` and
-`POSTERS:END` markers in `index.html`: they are overwritten each time you run `build_posters.py`.
+shows the name once. Give the exact date (`2026-04-25`) and it is shown too. Delete any field you do not need. Do not edit `p/<slug>/index.html`, `t/<slug>/index.html`, `presentations/index.html` or the part between the
+`PRESENTATIONS:START` and `PRESENTATIONS:END` markers in `index.html`: they are overwritten each time you run `build_site.py`.
 
-### Search
+## Add a talk
 
-The all-posters page (`/posters/`) has a search box (it appears when JavaScript is on; without JavaScript every poster is
-simply listed). It matches every word you type against the title, conference, date, authors and keywords, ignoring
-case and accents, so `aans 2026` or `thrombectomy cns` both work. Opening
-`https://christopherrivasmed.github.io/posters/?q=aans` pre-fills the search.
+A talk works like a poster: pick a permanent slug (for example `chiari-support-group-2026`), then:
 
-### How many posters show on the home page
+```bash
+python scripts/new_talk.py chiari-support-group-2026     # creates talks/chiari-support-group-2026/talk.json
+python scripts/build_site.py
+python scripts/make_qr.py chiari-support-group-2026       # optional, if you want a QR for it
+python scripts/check_site.py
+```
 
-Set `"home_poster_limit"` in `site.json` (default 3), then run `python scripts/build_posters.py`. The home page shows
-that many of the newest posters, then the "View all posters" button. Posters are ordered by `date`, newest first. A
-poster with only a year (such as `2026`) sorts after posters with a full date in the same year, so give the exact date
-when you know it.
+Fill in `talk.json`; only `title` and `venue` are required. Example (the video fields are optional):
+
+```json
+{
+  "title": "Chiari Malformation Update: Surgical Techniques and Outcomes",
+  "venue": "Global Neurosciences Institute Chiari Support Group",
+  "date": "2026-09-02",
+  "presenter": "Christopher A. Rivas",
+  "keywords": ["Chiari", "patients and families"],
+  "background": [
+    "First paragraph of context: when, for whom, what it covers.",
+    "Second paragraph."
+  ],
+  "video": {
+    "youtube_id": "rfDcBr90m1U",
+    "thumbnail": "thumb.jpg",
+    "duration": "53 min",
+    "credit": "Global Neurosciences Institute"
+  },
+  "chapters": [
+    { "time": "0:00", "title": "Community Updates and Upcoming Events" },
+    { "time": "2:37", "title": "Meet the Researcher" }
+  ],
+  "slides": "slides.pdf",
+  "references": [],
+  "links": []
+}
+```
+
+| Field | Notes |
+|---|---|
+| `title`, `venue` | Required. `venue` is where, or for whom, the talk was given. |
+| `date` | Optional, same formats as for posters. |
+| `presenter` | Optional. Shown as "Presented by ...". |
+| `background` | Optional "About this talk" text: one string or a list of paragraphs. Keep it brief: context for someone about to watch. |
+| `video` | Optional. `youtube_id` is the 11 characters after `v=` in the video's address. `thumbnail` is a file in the talk's folder (save a 960 x 540 JPEG): the page shows it, and **nothing is requested from YouTube until the viewer taps play**, which keeps the page fast and avoids third-party cookies. `duration` and `credit` are optional labels. |
+| `chapters` | Optional list of `{"time": "m:ss", "title": "..."}` in increasing order (`h:mm:ss` also works). Each chapter is a button that starts the video at that time. Copy them from the YouTube description. Without JavaScript they open YouTube at that time. |
+| `slides`, `references`, `references_pdf`, `links`, `keywords` | Optional, same as for posters. |
+
+A talk that has no video simply omits `video` and `chapters`. Only post a recording if its owner has agreed.
+An **unlisted** YouTube video still plays for anyone who has the link, including through this site.
+
+### Search and filters
+
+The presentations page (`/presentations/`) has **All / Talks / Posters** buttons and a search box (they appear when
+JavaScript is on; without it everything is simply listed). Search matches every word you type against the title, venue or
+conference, date, people, keywords and type, ignoring case and accents, so `chiari 2026` or `aans talk` both work.
+`/presentations/?q=aans` and `/presentations/?type=talks` pre-fill the search and filter.
+
+### How many show on the home page
+
+Set `"home_talk_limit"` and `"home_poster_limit"` in `site.json` (both 2 by default), then run
+`python scripts/build_site.py`. The home page shows that many of the newest talks and of the newest posters, in two
+groups, then the "View all talks and presentations" button. Items are ordered by `date`, newest first. An item with only
+a year (such as `2026`) sorts after items with a full date in the same year, so give the exact date when you know it.
 
 ## Test locally
 
@@ -132,7 +192,7 @@ when you know it.
 python -m http.server 8000
 ```
 
-Open <http://localhost:8000/>, click a poster tile, use the back link, and try the "View all posters" button. Stop the server with Ctrl+C.
+Open <http://localhost:8000/>, click a talk or poster tile, use the back link, and try the "View all talks and presentations" button. Stop the server with Ctrl+C.
 Always serve from the repo root; opening the files by double-clicking will not work for some links.
 
 ## Before every push
@@ -141,7 +201,7 @@ Always serve from the repo root; opening the files by double-clicking will not w
 python scripts/check_site.py
 ```
 
-It checks that the poster pages and tiles are up to date with the `poster.json` files, that every linked file exists
+It checks that the poster pages, talk pages and lists are up to date with the `poster.json` and `talk.json` files, that every linked file exists
 (poster PDFs, CV, images), and that no phone number, unexpected email address or street address appears in any text
 file. It also lists every remaining `PLACEHOLDER`.
 
@@ -159,7 +219,7 @@ The link on the page and any printed references keep working. Keep it under a fe
   Use clean profile URLs without tracking parameters such as `?ev=...` or `?isSelfProfile=true`.
 * **Email:** edit the address in the header of `index.html` (both the `mailto:` and the visible text) and in
   `site.json` (shown on poster pages). If you change it, add it to `ALLOWED_EMAILS` in `scripts/check_site.py`
-  so the privacy scan accepts it, then run `python scripts/build_posters.py`.
+  so the privacy scan accepts it, then run `python scripts/build_site.py`.
 * **Photo:** `assets/photo.jpg` is a 420 x 420 square crop. To change it, save a new square JPEG with the same
   name (strip location metadata first; re-saving through Pillow or an image editor's "export" does this).
   Keep the `alt` text meaningful.
@@ -167,17 +227,17 @@ The link on the page and any printed references keep working. Keep it under a fe
 * **Link-preview image:** replace `assets/og-image.png` (1200 x 630 PNG or JPG). Chat apps cache previews, so a
   changed image can take a while to appear.
 * **Site address:** if the site ever moves (for example to a custom domain), update `base_url` in `site.json`, the
-  `canonical` and `og:` tags in `index.html`, run `python scripts/build_posters.py`, and **regenerate every QR code**.
+  `canonical` and `og:` tags in `index.html`, run `python scripts/build_site.py`, and **regenerate every QR code**.
 
 ## Analytics (optional, off by default)
 
-[GoatCounter](https://www.goatcounter.com) is free and does not use cookies. Poster pages are now the real
-destination of each QR code, so each `/p/<slug>/` shows up as its own row in your dashboard: that is your scan count
-per poster.
+[GoatCounter](https://www.goatcounter.com) is free and does not use cookies. Poster and talk pages are the real
+destination of each QR code, so each `/p/<slug>/` and `/t/<slug>/` shows up as its own row in your dashboard: that is
+your scan count per poster or talk.
 
 1. Create a GoatCounter site and note its code (the part before `.goatcounter.com`).
-2. Put it in `site.json` as `"goatcounter_code": "yourcode"` and run `python scripts/build_posters.py`.
-   Every poster page then includes the counter. To turn it off, set it back to `""` and rebuild.
+2. Put it in `site.json` as `"goatcounter_code": "yourcode"` and run `python scripts/build_site.py`.
+   Every poster and talk page then includes the counter. To turn it off, set it back to `""` and rebuild.
 3. To count home-page visits too, uncomment the snippet in the `<head>` of `index.html` and replace `YOURCODE`.
 
 ## Deploying

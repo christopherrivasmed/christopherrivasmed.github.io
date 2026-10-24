@@ -10,7 +10,7 @@ Usage:
 
 The QR encodes  <base_url>/p/<slug>/  (base_url comes from site.json) with error correction level Q
 and a 4-module quiet zone (the minimum in the QR standard). Print it at least ~2 x 2 inches
-(5 x 5 cm), dark on light. The poster page must exist first (python scripts/build_posters.py).
+(5 x 5 cm), dark on light. The page must exist first (python scripts/build_site.py). Works for posters and talks.
 """
 import argparse
 import json
@@ -31,7 +31,7 @@ DPI = 600
 
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("slug", nargs="?", help="poster slug, e.g. my-poster (must match p/<slug>/)")
+    ap.add_argument("slug", nargs="?", help="poster or talk slug, e.g. my-poster (must match p/<slug>/ or t/<slug>/)")
     ap.add_argument("--site", action="store_true", help="make a QR code for the home page instead of a poster")
     ap.add_argument("--base-url", default=DEFAULT_BASE_URL, help=f"site root (default {DEFAULT_BASE_URL})")
     ap.add_argument("--target", choices=["page", "references"], default="page",
@@ -48,9 +48,10 @@ def main() -> int:
             sys.exit("Give a poster slug, or use --site for the home page.")
         if not re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", args.slug):
             sys.exit("Slug must be lowercase letters, digits and hyphens only.")
-        if not (ROOT / "p" / args.slug / "index.html").exists():
-            sys.exit(f"p/{args.slug}/index.html does not exist. Run: python scripts/build_posters.py")
-        url = f"{args.base_url.rstrip('/')}/p/{args.slug}/" + ("#references" if args.target == "references" else "")
+        folder = next((f for f in ("p", "t") if (ROOT / f / args.slug / "index.html").exists()), None)
+        if folder is None:
+            sys.exit(f"No page for '{args.slug}' (looked in p/ and t/). Run: python scripts/build_site.py")
+        url = f"{args.base_url.rstrip('/')}/{folder}/{args.slug}/" + ("#references" if args.target == "references" else "")
         name = args.slug + ("-references" if args.target == "references" else "")
     qr = segno.make(url, error="q", micro=False, boost_error=False)
 

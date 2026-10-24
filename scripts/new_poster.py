@@ -34,10 +34,10 @@ Created posters/{slug}/poster.json
 
 Next steps:
   1. Edit posters/{slug}/poster.json (title, conference, date, references...).
-     Delete any field you do not need; "title", "conference" and "date" are required.
+     Delete any field you do not need; "title" and "conference" are required.
   2. Put the poster PDF at posters/{slug}/poster.pdf
      (optional: references.pdf, abstract.pdf, preview.jpg in the same folder; see README)
-  3. python scripts/build_posters.py        builds the poster page and the home-page tile
+  3. python scripts/build_site.py        builds the poster page and the home-page tile
   4. python scripts/make_qr.py {slug}       makes qr/{slug}.svg and qr/{slug}.png
 """
 

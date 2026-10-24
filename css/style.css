@@ -159,3 +159,32 @@ footer p { margin: 0 0 0.4rem; }
 .more { margin: 1rem 0 0; }
 .more-btn { justify-content: center; }
 .more-btn svg { width: 20px; height: 20px; }
+
+/* ---------- Talks and presentations ---------- */
+.group-h { margin: 1.25rem 0 0.6rem; font-size: 1.05rem; color: var(--muted); }
+.group-h:first-of-type { margin-top: 0.5rem; }
+.tile-kind { display: inline-block; margin: 0 0 0.35rem; padding: 0.05rem 0.55rem; border: 1px solid var(--accent); border-radius: 999px; color: var(--accent); font-size: 0.78rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+.filter { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0 0 0.75rem; }
+.chip { min-height: 44px; padding: 0.4rem 0.95rem; font: inherit; font-weight: 600; color: var(--text); background: var(--bg-soft); border: 1px solid var(--line); border-radius: 999px; cursor: pointer; }
+.chip:hover { border-color: var(--accent); }
+.chip[aria-pressed="true"] { color: var(--accent-text); background: var(--accent); border-color: var(--accent); }
+
+.video { position: relative; aspect-ratio: 16 / 9; width: 100%; background: #000; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; scroll-margin-top: 0.75rem; }
+.video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.video-facade { position: absolute; inset: 0; display: block; color: #fff; text-decoration: none; }
+.video-facade img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.video-play { position: absolute; left: 50%; top: 50%; width: 68px; height: 68px; margin: -34px 0 0 -34px; display: flex; align-items: center; justify-content: center; background: rgba(0, 0, 0, 0.72); border: 2px solid #fff; border-radius: 50%; }
+.video-play svg { width: 34px; height: 34px; fill: #fff; margin-left: 4px; }
+.video-facade:hover .video-play, .video-facade:focus-visible .video-play { background: var(--accent); border-color: var(--accent); }
+.video-facade:hover .video-play svg, .video-facade:focus-visible .video-play svg { fill: var(--accent-text); }
+.video-label { position: absolute; left: 0; right: 0; bottom: 0; padding: 1.25rem 0.9rem 0.6rem; background: linear-gradient(transparent, rgba(0, 0, 0, 0.75)); font-weight: 600; }
+.video-credit { margin: 0.6rem 0 0; color: var(--muted); font-size: 0.9rem; }
+
+.hint { color: var(--muted); font-size: 0.95rem; }
+.chapters { margin: 0; padding: 0; list-style: none; display: grid; gap: 0.5rem; }
+.chapters a { display: flex; align-items: baseline; gap: 0.85rem; min-height: 48px; padding: 0.6rem 0.9rem; color: var(--text); text-decoration: none; background: var(--bg-soft); border: 1px solid var(--line); border-radius: var(--radius); }
+.chapters a:hover, .chapters a:focus-visible { border-color: var(--accent); }
+.chapters a[aria-current="true"] { border-color: var(--accent); box-shadow: inset 4px 0 0 var(--accent); }
+.chapter-time { flex: none; min-width: 3.2rem; color: var(--accent); font-weight: 700; font-variant-numeric: tabular-nums; }
+.chapter-title { font-weight: 600; }
+@media (min-width: 40rem) { .chapters { grid-template-columns: 1fr 1fr; } }
