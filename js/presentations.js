@@ -13,7 +13,7 @@
 
   function norm(s) {
     s = s.toLowerCase();
-    return s.normalize ? s.normalize("NFD").replace(/[̀-ͯ]/g, "") : s;
+    return s.normalize ? s.normalize("NFD").replace(/[\u0300-\u036f]/g, "") : s;
   }
   var haystacks = items.map(function (li) { return norm(li.getAttribute("data-search") || ""); });
   var kind = "all";
